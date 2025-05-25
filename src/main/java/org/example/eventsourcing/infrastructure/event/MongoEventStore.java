@@ -39,7 +39,7 @@ public class MongoEventStore implements EventStore {
     @Override
     public void saveEvents(OrderId orderId, List<OrderEvent> events) {
         List<StoredEvent> storedEvents = events.stream()
-                .map(event -> new StoredEvent(orderId.getValue(), event.getClass().getSimpleName(), eventSerializer.serialize(event), 1))
+                .map(event -> new StoredEvent(orderId.getValue(), event.getClass().getSimpleName(), eventSerializer.serialize(event), event.getVersion()))
                 .toList();
         eventRepository.saveAll(storedEvents);
     }

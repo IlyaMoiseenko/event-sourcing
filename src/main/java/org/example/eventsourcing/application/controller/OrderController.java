@@ -12,6 +12,8 @@ import org.example.eventsourcing.application.mapper.OrderMapper;
 import org.example.eventsourcing.application.query.OrderViewRepository;
 import org.example.eventsourcing.domain.model.OrderId;
 import org.example.eventsourcing.domain.model.Product;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +30,8 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
+    private static final Logger log = LoggerFactory.getLogger(OrderController.class);
+
     private final OrderCommandHandler commandHandler;  // Обработчик команд
     private final OrderViewRepository viewRepository; // Репозиторий проекций
     private final OrderMapper orderMapper;            // Маппер
@@ -53,10 +57,11 @@ public class OrderController {
      */
     @PostMapping
     public ResponseEntity<String> createOrder(@Valid @RequestBody CreateOrderRequest request) {
+        log.info("Received request to create order for customerId: {}", request.getCustomerId());
         OrderId orderId = commandHandler.handle(
                 new CreateOrderCommand(request.getCustomerId())
         );
-
+        log.info("Order created successfully with orderId: {}", orderId.getValue());
         return ResponseEntity.ok(orderId.getValue());
     }
 
@@ -69,9 +74,10 @@ public class OrderController {
      */
     @PostMapping("/{orderId}/items")
     public ResponseEntity<Void> addItem(@PathVariable String orderId, @Valid @RequestBody AddItemRequest request) {
+        log.info("Received request to add item to orderId: {}. ProductId: {}", orderId, request.getProductId());
         Product item = new Product(request.getProductId(), request.getName(), request.getPrice(), request.getQuantity());
         commandHandler.handle(new AddProductCommand(new OrderId(orderId), item));
-
+        log.info("Item added successfully to orderId: {}", orderId);
         return ResponseEntity.ok().build();
     }
 
@@ -83,7 +89,9 @@ public class OrderController {
      */
     @PostMapping("/{orderId}/confirm")
     public ResponseEntity<Void> confirmOrder(@PathVariable String orderId) {
+        log.info("Received request to confirm orderId: {}", orderId);
         commandHandler.handle(new ConfirmOrderCommand(new OrderId(orderId)));
+        log.info("Order confirmed successfully: {}", orderId);
         return ResponseEntity.ok().build();
     }
 
@@ -95,9 +103,16 @@ public class OrderController {
      */
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderResponse> getOrder(@PathVariable String orderId) {
+        log.info("Received request to get order by orderId: {}", orderId);
         Optional<OrderResponse> response = viewRepository.findById(orderId)
                 .map(orderMapper::toResponse);
-        return response.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+
+        if (response.isPresent()) {
+            log.info("Order found for orderId: {}", orderId);
+            return ResponseEntity.ok(response.get());
+        } else {
+            log.warn("Order not found for orderId: {}", orderId);
+            return ResponseEntity.notFound().build();
+        }
     }
 }

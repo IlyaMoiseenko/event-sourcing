@@ -13,10 +13,13 @@ import java.util.UUID;
  */
 @Getter
 public class ItemAddedEvent implements OrderEvent {
+    private static final int CURRENT_VERSION = 1;
+
     private final String eventId;    // Уникальный идентификатор события
     private final OrderId orderId;   // Идентификатор заказа
     private final Product product;   // Добавленный товар
     private final Instant timestamp; // Время создания события
+    private final int version;       // Версия события
 
     /**
      * Создает новое событие добавления товара.
@@ -31,5 +34,11 @@ public class ItemAddedEvent implements OrderEvent {
         this.orderId = orderId;
         this.product = product;
         this.timestamp = Instant.now();
+        this.version = CURRENT_VERSION;
+    }
+
+    @Override
+    public int getVersion() {
+        return version;
     }
 }

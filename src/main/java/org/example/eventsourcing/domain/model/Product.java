@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.math.BigDecimal;
 
@@ -12,14 +11,13 @@ import java.math.BigDecimal;
  * Класс, представляющий товар в заказе.
  */
 @Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class Product {
 
-    private String productId; // Идентификатор продукта
-    private String name;      // Название продукта
-    private BigDecimal price; // Цена продукта
-    private int quantity;     // Количество
+    private final String productId; // Идентификатор продукта
+    private final String name;      // Название продукта
+    private final BigDecimal price; // Цена продукта
+    private final int quantity;     // Количество
 }

@@ -20,4 +20,11 @@ public interface OrderEvent {
      * @return идентификатор события
      */
     String getEventId();
+
+    /**
+     * Возвращает версию схемы события.
+     *
+     * @return версия события
+     */
+    int getVersion();
 }

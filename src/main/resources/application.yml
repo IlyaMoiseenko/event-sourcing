@@ -7,20 +7,20 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb://localhost:27017/order-service
-      database: order-service
+      uri: ${MONGODB_URI:mongodb://localhost:27017/order-service-default-db}
+      database: ${MONGODB_DATABASE:order-service-default-db-name}
     redis:
-      host: localhost
-      port: 6379
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
 
   kafka:
     producer:
-      bootstrap-servers: localhost:9092
+      bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
-      bootstrap-servers: localhost:9092
-      group-id: order-service-group
+      bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
+      group-id: ${KAFKA_CONSUMER_GROUP_ID:order-service-group}
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
@@ -28,4 +28,7 @@ spring:
         spring.json.trusted.packages: org.example.eventsourcing.domain.event
 app:
   kafka:
-    topic: order-events
+    topic: ${APP_KAFKA_TOPIC_ORDER_EVENTS:order-events}
+  event:
+    idempotency:
+      redis-prefix: ${APP_EVENT_IDEMPOTENCY_REDIS_PREFIX:event:}
